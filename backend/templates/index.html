@@ -1,53 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ title }}</title>
-  <link rel="stylesheet" href="/static/styles.css" />
-</head>
-<body>
-  <main>
-    <h1>{{ title }}</h1>
-    <p class="sub">{{ description }} · LLM <span class="pill">{{ llm_mode }}</span></p>
-    <div class="grid">
-      <section class="card">
-        <h2>Create experiment</h2>
-        <form method="post" action="/ui/create">
-        <label>name</label><input name="name" placeholder="name" required />
-<label>params</label><input name="params" placeholder="params" required />
-<label>metrics</label><input name="metrics" placeholder="metrics" required />
-          <button type="submit">Save</button>
-        </form>
-        <h2 style="margin-top:1.25rem">AI action: {{ action }}</h2>
-        <p class="sub">{{ action_desc }}</p>
-        <form method="post" action="/ui/action">
-          <label>prompt</label>
-          <textarea name="prompt" rows="4" placeholder="Describe what you need..."></textarea>
-          <button type="submit">Run {{ action }}</button>
-        </form>
-        {% if last_result %}
-        <h3>Last result</h3>
-        <pre>{{ last_result }}</pre>
-        {% endif %}
-      </section>
-      <section class="card">
-        <h2>{{ resource }} ({{ items|length }})</h2>
-        <table>
-          <thead><tr><th>id</th><th>data</th></tr></thead>
-          <tbody>
-          {% for item in items %}
-            <tr>
-              <td>{{ item.id }}</td>
-              <td><code>{{ item }}</code></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="2">No items yet</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </section>
-    </div>
-  </main>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>{{ title }}</title><link rel="stylesheet" href="/static/styles.css"/></head>
+<body><main>
+<h1>{{ title }}</h1>
+<p class="sub">Log runs with params/metrics JSON and compare recent pairs.</p>
+<div class="grid">
+<section class="card">
+  <form method="post" action="/ui/experiments"><label>Name</label><input name="name" required/>
+  <label>Description</label><textarea name="description" rows="2"></textarea><button type="submit">Create</button></form>
+  <ul>{% for e in experiments %}<li><a href="/?experiment_id={{ e.id }}">{{ e.name }}</a></li>{% endfor %}</ul>
+  {% if experiment_id %}
+  <form method="post" action="/ui/runs"><input type="hidden" name="experiment_id" value="{{ experiment_id }}"/>
+  <label>Run name</label><input name="name" value="run-a"/>
+  <label>lr</label><input name="lr" type="number" step="0.001" value="0.01"/>
+  <label>accuracy</label><input name="acc" type="number" step="0.001" value="0.91"/>
+  <button type="submit">Log run</button></form>
+  {% endif %}
+</section>
+<section class="card">
+  <h2>Runs</h2>
+  {% for r in runs %}<div class="sub">{{ r.name }} · {{ r.params_json }} · {{ r.metrics_json }}</div>{% endfor %}
+  {% if compare %}<h2>Compare (latest 2)</h2><pre>{{ compare }}</pre>{% endif %}
+</section>
+</div></main></body></html>
